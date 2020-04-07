@@ -5,43 +5,61 @@ import MissionsListFooter from "./MissionsListFooter";
 import styles from "./MissionsList.module.css";
 
 const MissionsList = ({ missions }) => {
-  const [sortByDateType, setDateSortingType] = useState("asc");
+  const [sortType, setSortingType] = useState("date");
+  const [sortDirection, setSortingDirection] = useState("asc");
 
-  const toggleDateSorting = () => {
-    setDateSortingType(sortByDateType === "asc" ? "desc" : "asc");
-  };
-
-  const sortByMissionDate = (a, b) => {
-    if (sortByDateType === "desc") {
-      return new Date(b.date) - new Date(a.date);
+  const toggleSorting = type => {
+    if (type === sortType) {
+      setSortingDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortingType(type);
+      setSortingDirection("asc");
     }
-    return new Date(a.date) - new Date(b.date);
   };
 
-  const missionMinToBase = missions.reduce(
+  const sortBySelectedType = (a, b) => {
+    switch (sortType) {
+      case "date":
+        return new Date(a.date) - new Date(b.date);
+      case "agent":
+        return a[sortType] - b[sortType];
+      default:
+        return ("" + a[sortType]).localeCompare(b[sortType]);
+    }
+  };
+
+  const getSortedMissions = () => {
+    const sortedMissions = missions.sort(sortBySelectedType);
+    if (sortDirection == "desc") {
+      sortedMissions.reverse();
+    }
+    return sortedMissions;
+  };
+
+  const minDistanceToBase = missions.reduce(
     (acc, obj) => Math.min(obj.distanceFromBase, acc),
     [missions[0].distanceFromBase]
   );
 
-  const missionMaxToBase = missions.reduce(
+  const maxDistanceToBase = missions.reduce(
     (acc, obj) => Math.max(obj.distanceFromBase, acc),
     [missions[0].distanceFromBase]
   );
 
   return (
-    <div className={`${styles.container} sort-${sortByDateType}`}>
-      <MissionsListHeader toggleDateSorting={toggleDateSorting} />
+    <div className={`${styles.container} sort-${sortDirection}`}>
+      <MissionsListHeader toggleSorting={toggleSorting} />
 
-      {missions.sort(sortByMissionDate).map(mission => {
+      {getSortedMissions().map(mission => {
         return (
           <MissionsListItem
             key={`${mission.agent}_${mission.country}`}
             mission={mission}
             closestToBase={
-              Number(missionMinToBase) === Number(mission.distanceFromBase)
+              Number(minDistanceToBase) === Number(mission.distanceFromBase)
             }
             farthestFromBase={
-              Number(missionMaxToBase) === Number(mission.distanceFromBase)
+              Number(maxDistanceToBase) === Number(mission.distanceFromBase)
             }
           />
         );

@@ -72,7 +72,13 @@ const missions = [
 ];
 
 const getMissions = () => {
-  return missions;
+  const missionsInStorage = localStorage.getItem("mi6Missions");
+  if (missionsInStorage) {
+    return JSON.parse(missionsInStorage);
+  } else {
+    localStorage.setItem("mi6Missions", JSON.stringify(missions));
+    return missions;
+  }
 };
 
 export { getMissions };

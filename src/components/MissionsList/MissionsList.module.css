@@ -2,7 +2,9 @@
   border: 1px solid #dadada;
   border-radius: 4px;
 }
-
+.header {
+  cursor: pointer;
+}
 .header,
 .item,
 .footer {
